@@ -1,0 +1,9 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs/LinearSystems/v17/TestStore/0
+/LinearSystems/obj
+/LinearSystems.Specs/bin/Debug/net7.0
+/LinearSystems.Specs/obj/Debug/net7.0
+/LinearSystems.Specs/obj

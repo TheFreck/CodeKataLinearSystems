@@ -8,16 +8,18 @@ namespace LinearSystems
 {
     public class LinearSystem
     {
-        public double[,] FindVariables(string input)
+        public double[][] FindVariables(string input)
         {
             var lines = input.Split("\r\n");
-            double[,] variables = new double[lines.Length, lines.Length + 1];
+            double[][] variables = new double[lines.Length][];
             for (var i = 0; i < lines.Length; i++)
             {
                 var chars = lines[i].Split(" ");
+                variables[i] = new double[chars.Length];
                 for (var j = 0; j < chars.Length; j++)
                 {
-                    variables[i, j] = double.Parse(chars[j]);
+                    var parsed = double.Parse(chars[j]);
+                    variables[i][j] = double.Parse(chars[j]);
                 }
             }
             return variables;
@@ -88,28 +90,37 @@ namespace LinearSystems
             return new double[] { x, y };
         }
 
-        public double[] Solve(string input)
+        public double[][] Condense(double[][] coefficients)
         {
-            var coefficients = FindVariables(input);
-            var jaggedCoefficients = new double[coefficients.GetLength(0)][];
-            for (var i = 0; i < coefficients.GetLength(0); i++)
+            var jaggedCoefficients = new double[coefficients.Length][];
+            for (var i = 0; i < coefficients.Length; i++)
             {
-                var jaggedLine = new double[coefficients.GetLength(1)];
-                for (var j = 0; j < coefficients.GetLength(1); j++)
+                var jaggedLine = new double[coefficients[0].Length];
+                for (var j = 0; j < coefficients[0].Length; j++)
                 {
-                    jaggedLine[j] = coefficients[i, j];
+                    jaggedLine[j] = coefficients[i][j];
                 }
                 jaggedCoefficients[i] = jaggedLine;
             }
-            var variables = new double[coefficients.GetLength(0)][];
-            for (var i = 0; i < variables.GetLength(0) - 1; i++)
+            var variables = new double[coefficients.Length - 1][];
+            for (var i = 0; i < jaggedCoefficients.Length - 1; i++)
             {
-                var eliminated = EliminateVar(jaggedCoefficients[i], jaggedCoefficients[i + 1], i);
+                var eliminated = EliminateVar(jaggedCoefficients[i], jaggedCoefficients[i + 1], 0);
                 variables[i] = eliminated;
             }
+            return variables;
+        }
 
-
-            return new double[] { 1 };
+        public double[][] Solve(string input)
+        { 
+            var coefficients = FindVariables(input);
+            var condensed = Condense(coefficients);
+            var allCondensed = new List<double[][]> { condensed };
+            for(var i = 0;i < coefficients.GetLength(0)-1; i++)
+            {
+                allCondensed.Add(Condense(condensed));
+            }
+            return allCondensed[0];
         }
     }
 }
