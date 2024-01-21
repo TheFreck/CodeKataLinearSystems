@@ -33,21 +33,23 @@ namespace LinearSystems.Specs
     {
         Establish context = () =>
         {
-            input = "1 1 1 6\r\n2 1 3 13\r\n3 2 -1 4";
-            expected = new double[][]
-            {
-                new double[] { 1,2,3 }
-            };
+            //input = "1 1 1 6\r\n2 1 3 13\r\n3 2 -1 4";
+            //expected = new double[][]
+            //{
+            //    new double[] { 1,2,3 }
+            //};
+            input = "4 3 2 1 16\r\n1 1 2 3 4 30\r\n2 2 2 2 20\r\n-1 2 -3 4 10";
+            expected = new double[] { 1,1,1,1 };
         };
 
         Because of = () => answer = linearSystem.Solve(input);
 
-        It Should_Return_A_Double_Array = () => answer.ShouldBeOfExactType<double[,]>();
+        It Should_Return_A_Double_Array = () => answer.ShouldBeOfExactType<double[]>();
         It Should_Return_Expected_Answer = () => answer.ShouldEqual(expected);
 
         private static string input;
-        private static double[][] answer;
-        private static double[][] expected;
+        private static double[] answer;
+        private static double[] expected;
     }
 
     public class When_Condensing_A_System_With_Three_Variables : With_A_Linear_System
@@ -58,7 +60,7 @@ namespace LinearSystems.Specs
             expected = new[] { new double[] { 0, 1, -1, -1 }, new double[] { 0, -1, 11, 31 } };
         };
 
-        Because of = () => answer = linearSystem.Condense(input);
+        Because of = () => answer = linearSystem.Condense(input,0);
 
         It Should_Return_Jagged_Double_Array = () => answer.ShouldBeOfExactType<double[][]>();
         It Should_Return_Expected_Values = () =>
@@ -81,11 +83,21 @@ namespace LinearSystems.Specs
     {
         Establish context = () =>
         {
-            input = new double[][] { new double[] { 0,3,4,5,6,18 }, new double[] { 0,5,4,3,2,14}, new double[] { 0,-7,2,-3,1,-7}, new double[] { 0,1,-7,-1,8,1} };
-            expected = new[] { new double[] { 0,0,8,16,14,48 }, new double[] { 0,0,18,36,9,133}, new double[] { 0,0,-47,-10,57,0 } };
+            input = new double[][] { 
+                new double[] { 2,3,4,5,6,20 }, 
+                new double[] { 6,5,4,3,2,20}, 
+                new double[] { 1,-7,2,-3,1,-6}, 
+                new double[] { 3,1,-7,-1,8,4} 
+            };
+            expected = new[]
+            {
+                new double[] { -32,-24,-16,-8,0,-80},
+                new double[] { 4,19,0,9,0,32},
+                new double[] { 5,-57,23,-23,0,-52}
+            };
         };
 
-        Because of = () => answer = linearSystem.Condense(input);
+        Because of = () => answer = linearSystem.Condense(input,4);
 
         It Should_Return_Jagged_Double_Array = () => answer.ShouldBeOfExactType<double[][]>();
         It Should_Return_Expected_Values = () =>
@@ -98,7 +110,7 @@ namespace LinearSystems.Specs
                 }
             }
         };
-        It Should_Return_Expected_Values_Together = () => answer.ShouldEqual(expected);
+        //It Should_Return_Expected_Values_Together = () => answer.ShouldEqual(expected);
 
         private static double[][] input;
         private static double[][] expected;
@@ -110,10 +122,14 @@ namespace LinearSystems.Specs
         Establish context = () =>
         {
             input = new double[][] { new double[] { 2, 3, 1, -5, 17 }, new double[] { 1, -4, 2, 3, 11 }, new double[] { 1, 1, -3, -1, -23 }, new double[] { 3, -1, -6, 4, -47 } };
-            expected = new[] { new double[] { 0,11,-3, -11,-5 }, new double[] { 0,-5,5,4,34}, new double[] { 0,4,-3,-7,-22} };
+            expected = new[] { 
+                new double[] { 0,11,-3,-11,-5 },
+                new double[] { 0,-5,5,4,34}, 
+                new double[] { 0,4,-3,-7,-22} 
+            };
         };
 
-        Because of = () => answer = linearSystem.Condense(input);
+        Because of = () => answer = linearSystem.Condense(input,0);
 
         It Should_Return_Jagged_Double_Array = () => answer.ShouldBeOfExactType<double[][]>();
         It Should_Return_Expected_Values = () =>
@@ -126,6 +142,7 @@ namespace LinearSystems.Specs
                 }
             }
         };
+        //It Should_Return_Expected_Values_Together = () => answer.ShouldEqual(expected);
 
         private static double[][] input;
         private static double[][] expected;

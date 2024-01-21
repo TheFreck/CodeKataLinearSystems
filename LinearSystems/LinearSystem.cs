@@ -28,20 +28,10 @@ namespace LinearSystems
         public double[] EliminateVar(double[] eq1, double[] eq2, int varToEliminate)
         {
             var eliminated = new double[eq1.Length, eq2.Length];
-            var factor1 = eq1[varToEliminate];
-            var factor2 = eq2[varToEliminate];
+            var combined = new double[eq1.Length];
             for (var i = 0; i < eq1.Length; i++)
             {
-                eliminated[0, i] = eq1[i] * factor2;
-            }
-            for (var j = 0; j < eq2.Length; j++)
-            {
-                eliminated[1, j] = eq2[j] * factor1;
-            }
-            var combined = new double[eq1.Length];
-            for (var k = 0; k < eliminated.GetLength(1); k++)
-            {
-                combined[k] = eliminated[0, k] - eliminated[1, k];
+                combined[i] = eq1[i] * eq2[varToEliminate] - eq2[i] * eq1[varToEliminate];
             }
             return combined;
         }
@@ -90,37 +80,36 @@ namespace LinearSystems
             return new double[] { x, y };
         }
 
-        public double[][] Condense(double[][] coefficients)
+        public double[][] Condense(double[][] coefficients, int varToEliminate)
         {
-            var jaggedCoefficients = new double[coefficients.Length][];
-            for (var i = 0; i < coefficients.Length; i++)
-            {
-                var jaggedLine = new double[coefficients[0].Length];
-                for (var j = 0; j < coefficients[0].Length; j++)
-                {
-                    jaggedLine[j] = coefficients[i][j];
-                }
-                jaggedCoefficients[i] = jaggedLine;
-            }
             var variables = new double[coefficients.Length - 1][];
-            for (var i = 0; i < jaggedCoefficients.Length - 1; i++)
+            for (var i = 0; i < coefficients.Length - 1; i++)
             {
-                var eliminated = EliminateVar(jaggedCoefficients[i], jaggedCoefficients[i + 1], 0);
+                var eliminated = EliminateVar(coefficients[i], coefficients[i + 1], varToEliminate);
                 variables[i] = eliminated;
             }
             return variables;
         }
 
-        public double[][] Solve(string input)
+        public double[] Solve(string input)
         { 
             var coefficients = FindVariables(input);
-            var condensed = Condense(coefficients);
-            var allCondensed = new List<double[][]> { condensed };
-            for(var i = 0;i < coefficients.GetLength(0)-1; i++)
+            var varValues = new double[coefficients[0].Length-1];
+            for(var i=coefficients[0].Length-1; i>0; i--)
             {
-                allCondensed.Add(Condense(condensed));
+                var allCondensed = new List<double[][]>();
+                allCondensed.Add(Condense(coefficients, i));
+
+                for(var j = 0;j < coefficients.GetLength(0)-2; j++)
+                {
+                    allCondensed.Add(Condense(allCondensed[j],j+1));
+                }
+                var isolated = Isolate(allCondensed.LastOrDefault()[0], allCondensed.Count );
+                var reduced = Reduce(isolated,0);
+                varValues[i-1] = reduced.LastOrDefault();
             }
-            return allCondensed[0];
+
+            return varValues;
         }
     }
 }
