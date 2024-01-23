@@ -27,7 +27,6 @@ namespace LinearSystems
 
         public double[] EliminateVar(double[] eq1, double[] eq2, int varToEliminate)
         {
-            var eliminated = new double[eq1.Length, eq2.Length];
             var combined = new double[eq1.Length];
             for (var i = 0; i < eq1.Length; i++)
             {
@@ -51,6 +50,7 @@ namespace LinearSystems
 
         public double[] Reduce(double[] input, int place)
         {
+            if (input[place] == 0) return input;
             var output = new double[input.Length];
             for (var i = 0; i < output.Length; i++)
             {
@@ -95,21 +95,33 @@ namespace LinearSystems
         { 
             var coefficients = FindVariables(input);
             var varValues = new double[coefficients[0].Length-1];
-            for(var i=coefficients[0].Length-1; i>0; i--)
-            {
-                var allCondensed = new List<double[][]>();
-                allCondensed.Add(Condense(coefficients, i));
-
-                for(var j = 0;j < coefficients.GetLength(0)-2; j++)
-                {
-                    allCondensed.Add(Condense(allCondensed[j],j+1));
-                }
-                var isolated = Isolate(allCondensed.LastOrDefault()[0], allCondensed.Count );
-                var reduced = Reduce(isolated,0);
-                varValues[i-1] = reduced.LastOrDefault();
-            }
+            var echelonStep = EchelonForm(coefficients);
 
             return varValues;
+        }
+
+        public double[][] EchelonForm(double[][] input)
+        {
+            for(var x=0; x<input.Length; x++)
+            {
+                input[x] = Reduce(input[x], x);
+                for(var i=x+1; i<input.Length; i++)
+                {
+                    input[i] = Reduce(input[i],x);
+                    for(var j=x; j < input[0].Length; j++)
+                    {
+                        input[i][j] = input[x][j] - input[i][j];
+                    }
+                }
+            }
+            // loop through to substitute
+            for(var y=input.Length-1; y>0; y--)
+            {
+                input[y - 1][y] = 0;
+                input[y - 1][y+1] -= input[y].LastOrDefault();
+            }
+
+            return input;
         }
     }
 }

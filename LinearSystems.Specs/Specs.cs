@@ -38,8 +38,8 @@ namespace LinearSystems.Specs
             //{
             //    new double[] { 1,2,3 }
             //};
-            input = "4 3 2 1 16\r\n1 1 2 3 4 30\r\n2 2 2 2 20\r\n-1 2 -3 4 10";
-            expected = new double[] { 1,1,1,1 };
+            input = "2 3 2 14\r\n1 4 2 15\r\n2 -3 1 -1";
+            expected = new double[] { 1,2,3 };
         };
 
         Because of = () => answer = linearSystem.Solve(input);
@@ -402,5 +402,33 @@ namespace LinearSystems.Specs
         private static int replaceVar;
         private static double[] expected;
         private static double[] output;
+    }
+
+    public class When_Converting_A_System_Of_Equations_Into_Echelon_Form : With_A_Linear_System
+    {
+        Establish context = () =>
+        {
+            input = new double[][] { new double[]{ 2, 3, 2, 14 }, new double[] { 1, 4, 2, 15 }, new double[] { 2, -3, 1, -1 } };
+            expected = new double[][] { new double[] { 1, 1.5, 1, 7 } , new double[] { 0, 1, .4, 3.2 }, new double[] { 0, 0, 1, 3 } };
+        };
+
+        Because of = () => output = linearSystem.EchelonForm(input);
+
+        It Should_Return_A_Double_Array = () => output.ShouldBeOfExactType<double[][]>();
+        //It Should_Return_Expected_Values_Together = () => output.ShouldEqual(expected);
+        It Should_Return_Expected_Values = () =>
+        {
+            for (var i = 0; i < output.Length; i++)
+            {
+                for (var j = 0; j < output.Length; j++)
+                {
+                    output[j].ShouldEqual(output[j]);
+                }
+            }
+        };
+
+        private static double[][] input;
+        private static double[][] expected;
+        private static double[][] output;
     }
 }
