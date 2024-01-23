@@ -25,28 +25,61 @@ namespace LinearSystems
             return variables;
         }
 
-        public double[] EliminateVar(double[] eq1, double[] eq2, int varToEliminate)
-        {
-            var combined = new double[eq1.Length];
-            for (var i = 0; i < eq1.Length; i++)
-            {
-                combined[i] = eq1[i] * eq2[varToEliminate] - eq2[i] * eq1[varToEliminate];
-            }
-            return combined;
-        }
+        //public double[] EliminateVar(double[] eq1, double[] eq2, int varToEliminate)
+        //{
+        //    var combined = new double[eq1.Length];
+        //    for (var i = 0; i < eq1.Length; i++)
+        //    {
+        //        combined[i] = eq1[i] * eq2[varToEliminate] - eq2[i] * eq1[varToEliminate];
+        //    }
+        //    return combined;
+        //}
 
-        public double[] Isolate(double[] input, int varToIsolate)
-        {
-            var output = new List<double> { input[varToIsolate] };
-            var i = 0;
-            for (i = 0; i < input.Length - 1; i++)
-            {
-                if (i == varToIsolate) continue;
-                output.Add(-input[i]);
-            }
-            output.Add(input[i]);
-            return output.ToArray();
-        }
+        //public double[] Isolate(double[] input, int varToIsolate)
+        //{
+        //    var output = new List<double> { input[varToIsolate] };
+        //    var i = 0;
+        //    for (i = 0; i < input.Length - 1; i++)
+        //    {
+        //        if (i == varToIsolate) continue;
+        //        output.Add(-input[i]);
+        //    }
+        //    output.Add(input[i]);
+        //    return output.ToArray();
+        //}
+
+        //public double[] Replace(double[] inputEq, double replace, int replaceVar)
+        //{
+        //    inputEq[replaceVar] *= replace;
+        //    return inputEq;
+        //}
+
+        //public double[] Solve2Vars(double[,] input)
+        //{
+        //    double a = input[0, 0];
+        //    double b = input[0, 1];
+        //    double c = input[0, 2];
+        //    double d = input[1, 0];
+        //    double e = input[1, 1];
+        //    double f = input[1, 2];
+
+        //    double x = (c * e - b * f) / (a * e - b * d);
+        //    double y = (c - a * x) / b;
+
+        //    return new double[] { x, y };
+        //}
+
+        //public double[][] Condense(double[][] coefficients, int varToEliminate)
+        //{
+        //    var variables = new double[coefficients.Length - 1][];
+        //    for (var i = 0; i < coefficients.Length - 1; i++)
+        //    {
+        //        var eliminated = EliminateVar(coefficients[i], coefficients[i + 1], varToEliminate);
+        //        variables[i] = eliminated;
+        //    }
+        //    return variables;
+        //}
+
 
         public double[] Reduce(double[] input, int place)
         {
@@ -57,47 +90,6 @@ namespace LinearSystems
                 output[i] = input[i] / input[place];
             }
             return output;
-        }
-
-        public double[] Replace(double[] inputEq, double replace, int replaceVar)
-        {
-            inputEq[replaceVar] *= replace;
-            return inputEq;
-        }
-
-        public double[] Solve2Vars(double[,] input)
-        {
-            double a = input[0, 0];
-            double b = input[0, 1];
-            double c = input[0, 2];
-            double d = input[1, 0];
-            double e = input[1, 1];
-            double f = input[1, 2];
-
-            double x = (c * e - b * f) / (a * e - b * d);
-            double y = (c - a * x) / b;
-
-            return new double[] { x, y };
-        }
-
-        public double[][] Condense(double[][] coefficients, int varToEliminate)
-        {
-            var variables = new double[coefficients.Length - 1][];
-            for (var i = 0; i < coefficients.Length - 1; i++)
-            {
-                var eliminated = EliminateVar(coefficients[i], coefficients[i + 1], varToEliminate);
-                variables[i] = eliminated;
-            }
-            return variables;
-        }
-
-        public double[] Solve(string input)
-        { 
-            var coefficients = FindVariables(input);
-            var varValues = new double[coefficients[0].Length-1];
-            var echelonStep = EchelonForm(coefficients);
-
-            return varValues;
         }
 
         public double[][] EchelonForm(double[][] input)
@@ -114,14 +106,31 @@ namespace LinearSystems
                     }
                 }
             }
-            // loop through to substitute
-            for(var y=input.Length-1; y>0; y--)
+            for(var y=input.Length-1; y>=1; y--)
             {
-                input[y - 1][y] = 0;
-                input[y - 1][y+1] -= input[y].LastOrDefault();
+                var variable = input[y].LastOrDefault();
+                for(var z=y-1; z>=0; z--)
+                {
+                    input[z][input[y].Length - 1] -= input[z][y] * variable;
+                    input[z][y] = 0;
+                }
             }
 
             return input;
+        }
+
+        public string Solve(string input)
+        {
+            var coefficients = FindVariables(input);
+            var unitMatrix = EchelonForm(coefficients);
+            var output = "SOLUTION=(";
+            for (var i = 0; i < unitMatrix.Length; i++)
+            {
+                output += Math.Round(unitMatrix[i].LastOrDefault()).ToString() + "; ";
+            }
+            output = output.Trim(' ').Trim(';');
+            output += ")";
+            return output;
         }
     }
 }
