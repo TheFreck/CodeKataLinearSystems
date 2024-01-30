@@ -1,28 +1,93 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace LinearSystems
 {
     public class LinearSystem
     {
-        public double[][] FindVariables(string input)
+        public string Solve(string input)
         {
             var lines = input.Split("\r\n");
-            double[][] variables = new double[lines.Length][];
+            decimal[][] coefficients = new decimal[lines.Length][];
             for (var i = 0; i < lines.Length; i++)
             {
                 var chars = lines[i].Split(" ");
-                variables[i] = new double[chars.Length];
+                coefficients[i] = new decimal[chars.Length];
                 for (var j = 0; j < chars.Length; j++)
                 {
-                    var parsed = double.Parse(chars[j]);
-                    variables[i][j] = double.Parse(chars[j]);
+                    var parsed = decimal.Parse(chars[j]);
+                    coefficients[i][j] = decimal.Parse(chars[j]);
                 }
             }
-            return variables;
+            var unitMatrix = EchelonForm(coefficients);
+            if (CheckAnswer(coefficients, unitMatrix.Select(x => x.LastOrDefault()).ToArray()))
+            {
+                var output = "SOLUTION=(";
+                for (var i = 0; i < unitMatrix.Length; i++)
+                {
+                    var outputString = unitMatrix[i].LastOrDefault().ToString("####.######");
+                    var outputStringOrZero = (outputString == "" || outputString.Length > 0 && outputString[0] == '.') ? "0" + outputString : outputString;
+                    output += $"{outputStringOrZero}; ";
+                }
+                output = output.Trim(' ').Trim(';');
+                output += ")";
+                if (output[0] == '.') output = "0" + output;
+                return output;
+            }
+            return "SOLUTION=None";
+        }
+
+        public decimal[] Reduce(decimal[] input, int place)
+        {
+            if (input[place] == 0) return input;
+            var output = new decimal[input.Length];
+            for (var i = 0; i < output.Length; i++)
+            {
+                output[i] = input[i] / input[place];
+            }
+            return output;
+        }
+
+        public decimal[][] EchelonForm(decimal[][] input)
+        {
+            for (var x = 0; x < input.Length; x++)
+            {
+                input[x] = Reduce(input[x], x);
+                for (var i = x + 1; i < input.Length; i++)
+                {
+                    input[i] = Reduce(input[i], x);
+                    if (input[i][x] != 0)
+                    {
+                        for (var j = x; j < input[0].Length; j++)
+                        {
+                            input[i][j] = input[x][j] - input[i][j];
+                        }
+                    }
+                }
+            }
+            for (var y = input.Length - 1; y >= 1; y--)
+            {
+                var variable = input[y].LastOrDefault();
+                for (var z = y - 1; z >= 0; z--)
+                {
+                    input[z][input[y].Length - 1] -= input[z][y] * variable;
+                    input[z][y] = 0;
+                }
+            }
+
+            return input;
+        }
+
+        public bool CheckAnswer(decimal[][] inputSystem, decimal[] inputTestAnswers)
+        {
+            for(var i=0; i<inputSystem.Length; i++)
+            {
+                decimal expected = 0;
+                for(var j=0; j < inputTestAnswers.Length; j++)
+                {
+                    expected += inputSystem[i][j] * inputTestAnswers[j];
+                }
+                if (expected != inputSystem[i].LastOrDefault()) return false;
+            }
+            return true;
         }
 
         //public double[] EliminateVar(double[] eq1, double[] eq2, int varToEliminate)
@@ -79,58 +144,5 @@ namespace LinearSystems
         //    }
         //    return variables;
         //}
-
-
-        public double[] Reduce(double[] input, int place)
-        {
-            if (input[place] == 0) return input;
-            var output = new double[input.Length];
-            for (var i = 0; i < output.Length; i++)
-            {
-                output[i] = input[i] / input[place];
-            }
-            return output;
-        }
-
-        public double[][] EchelonForm(double[][] input)
-        {
-            for(var x=0; x<input.Length; x++)
-            {
-                input[x] = Reduce(input[x], x);
-                for(var i=x+1; i<input.Length; i++)
-                {
-                    input[i] = Reduce(input[i],x);
-                    for(var j=x; j < input[0].Length; j++)
-                    {
-                        input[i][j] = input[x][j] - input[i][j];
-                    }
-                }
-            }
-            for(var y=input.Length-1; y>=1; y--)
-            {
-                var variable = input[y].LastOrDefault();
-                for(var z=y-1; z>=0; z--)
-                {
-                    input[z][input[y].Length - 1] -= input[z][y] * variable;
-                    input[z][y] = 0;
-                }
-            }
-
-            return input;
-        }
-
-        public string Solve(string input)
-        {
-            var coefficients = FindVariables(input);
-            var unitMatrix = EchelonForm(coefficients);
-            var output = "SOLUTION=(";
-            for (var i = 0; i < unitMatrix.Length; i++)
-            {
-                output += Math.Round(unitMatrix[i].LastOrDefault()).ToString() + "; ";
-            }
-            output = output.Trim(' ').Trim(';');
-            output += ")";
-            return output;
-        }
     }
 }
