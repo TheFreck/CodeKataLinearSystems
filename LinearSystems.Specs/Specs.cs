@@ -6,10 +6,10 @@ namespace LinearSystems.Specs
     {
         Establish context = () =>
         {
-            linearSystem = new LinearSystem();
+            linearSystem = new LinearSystemClass();
         };
 
-        protected static LinearSystem linearSystem;
+        protected static LinearSystemClass linearSystem;
     }
 
     public class When_Solving_Linear_Equations_And_A_Solution_Exists : With_A_Linear_System

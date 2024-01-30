@@ -1,7 +1,7 @@
 ﻿
 namespace LinearSystems
 {
-    public class LinearSystem
+    public class LinearSystemClass
     {
         public string Solve(string input)
         {
