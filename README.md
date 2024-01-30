@@ -34,3 +34,5 @@ So for the first example you have to call: Solve ("1 2 0 7\r\n0 0 3 8\r\n0 5 6 9
  
 One last word to the tests:
 The testfunction solves the given equations with your solution and accepts results which don't differ more than 1e-6 (precision) for each number - so no problem for you;-)!
+
+## PS - I ended up not submitting this to CodeWars because it asks for string output and the tests on CodeWars do not test against acurate number of significant digits when rounding. I might pull our all the stringification stuff since it takes a ton of lines and just return a jagged decimal array.
